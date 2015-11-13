@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace EntropySourceTesting
 {
@@ -49,7 +47,7 @@ namespace EntropySourceTesting
             }
         }
 
-        public void runTest()
+        public bool runTest()
         {
             //Lists of computed ranks for each data subset for each test
 
@@ -68,21 +66,12 @@ namespace EntropySourceTesting
                 int[] sDirectionalRuns = StatisticalScores.directionalRunsScores(subset);
                 int[] sCovariance = StatisticalScores.covarianceScores(subset);
                 int[] sCollision = StatisticalScores.collisionScores(subset);
-
-                //probably it is not needed
-
-                //sCompressionList.Add(sCompression);
-                //sRunsList.Add(sRuns);
-                //sExcursionList.Add(sExcursion);
-                //sDirectionalRunsList.Add(sDirectionalRuns);
-                //sCovarianceList.Add(sCovariance);
-                //sCollisionList.Add(sCollision);
-
+                                
                 //shuffling
 
                 //Shuffled subsets scores lists
 
-                List<int[]> shufCompressionList = new List<int[]>(subsetNumber);
+                List<int[]> shufCompressionList = new List<int[]>(1000);
                 List<int[]> shufRunsList = new List<int[]>(1000);
                 List<int[]> shufExcursionList = new List<int[]>(1000);
                 List<int[]> shufDirectionalRunsList = new List<int[]>(1000);
@@ -111,38 +100,71 @@ namespace EntropySourceTesting
                 ranksExcursionList.Add(ranksExcursion);
                 ranksDirectionalRunsList.Add(ranksDirectionalRuns);
                 ranksCovarianceList.Add(ranksCovariance);
-                ranksCollisionList.Add(ranksCollision);
-
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("=========== new dataset ===========");
-                printScores(ranksRuns, "runs");
-                printScores(ranksExcursion, "excurs");
-                printScores(ranksDirectionalRuns, "dir runs");
-                printScores(ranksCovariance, "covar");
-                printScores(ranksCollision, "collision");
-
-                //for testing
-                //Console.ForegroundColor = ConsoleColor.Green;
-                //Console.WriteLine("new subset");
-                //Console.ResetColor();
-
-                //printScores(sCompression, "compression");      
-                //printScores(sRuns, "runs");
-                //printScores(sExcursion, "excursion");
-                //printScores(sDirectionalRuns, "dir runs");
-                //printScores(sCovariance, "covar");
-                //printScores(sCollision, "collision");
-
+                ranksCollisionList.Add(ranksCollision);                
             }
 
-            //from list to comapare
-            //foreach (int[] vector in sRunsList)
-            //{
-            //    Console.ForegroundColor = ConsoleColor.Yellow;
-            //    Console.WriteLine("new subset");
-            //    Console.ResetColor();
-            //    printScores(vector, "runs");
-            //}
+            //results interpretation
+            bool compression = testResult(ranksCompressionList);
+            bool runs = testResult(ranksRunsList);
+            bool excursion = testResult(ranksExcursionList);
+            bool directional = testResult(ranksDirectionalRunsList);
+            bool covariance = testResult(ranksCovarianceList);
+            bool collision = testResult(ranksCollisionList);
+
+            //comment this section if extended resuls is out of need
+            #region extended results
+            extendedResult(compression, "Compression");
+            extendedResult(runs, "Over/Under Runs");
+            extendedResult(excursion, "Excursion");
+            extendedResult(directional, "Directional runs");
+            extendedResult(covariance, "Covariance");
+            extendedResult(collision, "Collision");
+            #endregion
+
+            return (compression && runs && excursion && directional && covariance && collision);
+        }
+
+        private static void extendedResult(bool test, string testname)
+        {
+            if (test)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(testname+" test has passed");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(testname + " test has failed");
+                Console.ResetColor();
+            }
+        }
+
+        private static bool testResult(List<int[]> ranksList)
+        {
+            int count = 0;
+            foreach (int[] ranks in ranksList)
+            {
+                //printScores(ranks, "test ranks");
+                if (testFailed(ranks))
+                    count++;
+            }
+            Console.WriteLine("Number of failed subsets in executed test " + count);
+            if (count >= 8)
+            {
+                //Console.WriteLine("test failed");
+                return false;
+            }
+            else
+            {
+                //Console.WriteLine("test passed");
+                return true;
+            }
+        }
+
+        private static bool testFailed(int[] ranks)
+        {
+            return Array.TrueForAll<int>(ranks, delegate (int rank) { return (rank <= 50 || rank >= 950); });
         }
 
         private static int[] getRanks(List<int[]> shufScoresList, int[] sTest)
@@ -186,15 +208,14 @@ namespace EntropySourceTesting
 
         public static void Main()
         {
-            int[] ds = new int[1000];
+            int[] ds = new int[10000];
             Random r = new Random();
             for (int i = 0; i < ds.Length; i++)
             {
                 ds[i] = r.Next(255);
             }
-
             ShufflingTest st = new ShufflingTest(ds);
-            st.runTest();
+            extendedResult(st.runTest(), "Shuffling test");      
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
