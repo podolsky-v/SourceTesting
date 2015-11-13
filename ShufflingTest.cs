@@ -51,14 +51,14 @@ namespace EntropySourceTesting
 
         public void runTest()
         {
-            //Original subsets scores lists (maybe it is not needed)
+            //Lists of computed ranks for each data subset for each test
 
-            //List<int[]> sCompressionList = new List<int[]>(subsetNumber);
-            //List<int[]> sRunsList = new List<int[]>(subsetNumber);
-            //List<int[]> sExcursionList = new List<int[]>(subsetNumber);
-            //List<int[]> sDirectionalRunsList = new List<int[]>(subsetNumber);
-            //List<int[]> sCovarianceList = new List<int[]>(subsetNumber);
-            //List<int[]> sCollisionList = new List<int[]>(subsetNumber);
+            List<int[]> ranksCompressionList = new List<int[]>(subsetNumber);
+            List<int[]> ranksRunsList = new List<int[]>(subsetNumber);
+            List<int[]> ranksExcursionList = new List<int[]>(subsetNumber);
+            List<int[]> ranksDirectionalRunsList = new List<int[]>(subsetNumber);
+            List<int[]> ranksCovarianceList = new List<int[]>(subsetNumber);
+            List<int[]> ranksCollisionList = new List<int[]>(subsetNumber);
 
             foreach (int[] subset in subsets)
             {
@@ -71,7 +71,7 @@ namespace EntropySourceTesting
 
                 //probably it is not needed
 
-                //sCompressionList.Add(sCompression);                
+                //sCompressionList.Add(sCompression);
                 //sRunsList.Add(sRuns);
                 //sExcursionList.Add(sExcursion);
                 //sDirectionalRunsList.Add(sDirectionalRuns);
@@ -82,7 +82,7 @@ namespace EntropySourceTesting
 
                 //Shuffled subsets scores lists
 
-                //List<int[]> shufCompressionList = new List<int[]>(subsetNumber);
+                List<int[]> shufCompressionList = new List<int[]>(subsetNumber);
                 List<int[]> shufRunsList = new List<int[]>(1000);
                 List<int[]> shufExcursionList = new List<int[]>(1000);
                 List<int[]> shufDirectionalRunsList = new List<int[]>(1000);
@@ -105,6 +105,13 @@ namespace EntropySourceTesting
                 int[] ranksDirectionalRuns = getRanks(shufDirectionalRunsList, sDirectionalRuns);
                 int[] ranksCovariance = getRanks(shufCovarianceList, sCovariance);
                 int[] ranksCollision = getRanks(shufCollisionList, sCollision);
+
+                //ranksCompressionList.Add(ranksCompression);
+                ranksRunsList.Add(ranksRuns);
+                ranksExcursionList.Add(ranksExcursion);
+                ranksDirectionalRunsList.Add(ranksDirectionalRuns);
+                ranksCovarianceList.Add(ranksCovariance);
+                ranksCollisionList.Add(ranksCollision);
 
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("=========== new dataset ===========");
