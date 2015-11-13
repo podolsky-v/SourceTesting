@@ -208,6 +208,8 @@ namespace EntropySourceTesting
 
         public static void Main()
         {
+            Console.Title = "Entropy source shuffling test";
+            Console.WriteLine("Working...");
             int[] ds = new int[10000];
             Random r = new Random();
             for (int i = 0; i < ds.Length; i++)
