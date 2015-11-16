@@ -95,6 +95,17 @@ namespace EntropySourceTesting
                 int[] ranksCovariance = getRanks(shufCovarianceList, sCovariance);
                 int[] ranksCollision = getRanks(shufCollisionList, sCollision);
 
+                //print ranks (optional)
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("========== new dataset ==========");
+                Console.ResetColor();
+                //printScores(ranksCompression, "Ranks for Compression test");                
+                printScores(ranksRuns, "Ranks for Runs test");
+                printScores(ranksExcursion, "Ranks for Excursion test");
+                printScores(ranksDirectionalRuns, "Ranks for DirectionalRuns test");
+                printScores(ranksCovariance, "Ranks for Covariance test");
+                printScores(ranksCollision, "Ranks for Collision test");
+
                 //ranksCompressionList.Add(ranksCompression);
                 ranksRunsList.Add(ranksRuns);
                 ranksExcursionList.Add(ranksExcursion);
@@ -104,12 +115,20 @@ namespace EntropySourceTesting
             }
 
             //results interpretation
-            bool compression = testResult(ranksCompressionList);
-            bool runs = testResult(ranksRunsList);
-            bool excursion = testResult(ranksExcursionList);
-            bool directional = testResult(ranksDirectionalRunsList);
-            bool covariance = testResult(ranksCovarianceList);
-            bool collision = testResult(ranksCollisionList);
+            //bool compression = testResult(ranksCompressionList);
+            //bool runs = testResult(ranksRunsList);
+            //bool excursion = testResult(ranksExcursionList);
+            //bool directional = testResult(ranksDirectionalRunsList);
+            //bool covariance = testResult(ranksCovarianceList);
+            //bool collision = testResult(ranksCollisionList);
+
+            //results with names
+            bool compression = testResult(ranksCompressionList, "Compression");
+            bool runs = testResult(ranksRunsList, "Runs");
+            bool excursion = testResult(ranksExcursionList, "Excursion");
+            bool directional = testResult(ranksDirectionalRunsList, "Directional runs");
+            bool covariance = testResult(ranksCovarianceList, "Covariance");
+            bool collision = testResult(ranksCollisionList, "Collsion");
 
             //comment this section if extended resuls is out of need
             #region extended results
@@ -150,6 +169,27 @@ namespace EntropySourceTesting
                     count++;
             }
             Console.WriteLine("Number of failed subsets in executed test " + count);
+            if (count >= 8)
+            {
+                //Console.WriteLine("test failed");
+                return false;
+            }
+            else
+            {
+                //Console.WriteLine("test passed");
+                return true;
+            }
+        }
+        private static bool testResult(List<int[]> ranksList, string message)
+        {
+            int count = 0;
+            foreach (int[] ranks in ranksList)
+            {
+                //printScores(ranks, "test ranks");
+                if (testFailed(ranks))
+                    count++;
+            }
+            Console.WriteLine("Number of failed subsets in "+message+" test " + count);
             if (count >= 8)
             {
                 //Console.WriteLine("test failed");
@@ -217,7 +257,9 @@ namespace EntropySourceTesting
                 ds[i] = r.Next(255);
             }
             ShufflingTest st = new ShufflingTest(ds);
-            extendedResult(st.runTest(), "Shuffling test");      
+            bool result = st.runTest();
+            Console.WriteLine();
+            extendedResult(result, "Shuffling test");      
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
