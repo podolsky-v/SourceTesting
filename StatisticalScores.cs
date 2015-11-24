@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections;
+using System.Text;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using ICSharpCode.SharpZipLib.BZip2;
 
 namespace EntropySourceTesting
 {
@@ -16,9 +17,29 @@ namespace EntropySourceTesting
         /// </summary>
         /// <param name="sample">sample to analyse</param>
         /// <returns>length of the compressed string in bytes</returns>
-        public static int[] compressionScores(int[] sample) {
-            throw new Exception("not implemented");         
-            //using BZ2 algorithm
+        public static int[] compressionScores(int[] sample)
+        {
+            string str = string.Join(",", sample);
+            //Console.WriteLine(str);
+            int res = -1;
+            using (MemoryStream inp = new MemoryStream(Encoding.UTF8.GetBytes(str)))
+            {
+                using (MemoryStream compressed = new MemoryStream())
+                {
+                    //Console.WriteLine("uncompressed length = " + inp.Length);
+                    try
+                    {
+                        BZip2.Compress(inp, compressed, false, 4096);
+                        res = (int)compressed.Length;
+                        //Console.WriteLine("compressed length = " + res);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+            return new int[] { res };
         }
 
         /// <summary>
