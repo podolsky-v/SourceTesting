@@ -60,7 +60,7 @@ namespace EntropySourceTesting
 
             foreach (int[] subset in subsets)
             {
-                //int[] sCompression = StatisticalScores.compressionScores(subset);
+                int[] sCompression = StatisticalScores.compressionScores(subset);
                 int[] sRuns = StatisticalScores.runsScores(subset);
                 int[] sExcursion = StatisticalScores.excursionScores(subset);
                 int[] sDirectionalRuns = StatisticalScores.directionalRunsScores(subset);
@@ -80,7 +80,7 @@ namespace EntropySourceTesting
                 for (int counter = 0; counter < 1000; counter++)
                 {
                     shuffle<int>(subset);
-                    //shufCompressionList.Add(StatisticalScores.compressionScores(subset));
+                    shufCompressionList.Add(StatisticalScores.compressionScores(subset));
                     shufRunsList.Add(StatisticalScores.runsScores(subset));
                     shufExcursionList.Add(StatisticalScores.excursionScores(subset));
                     shufDirectionalRunsList.Add(StatisticalScores.directionalRunsScores(subset));
@@ -88,7 +88,7 @@ namespace EntropySourceTesting
                     shufCollisionList.Add(StatisticalScores.collisionScores(subset));
                 }
 
-                //int[] ranksCompression = getRanks(shufCompressionList, sCompresion);
+                int[] ranksCompression = getRanks(shufCompressionList, sCompression);
                 int[] ranksRuns = getRanks(shufRunsList, sRuns);
                 int[] ranksExcursion = getRanks(shufExcursionList, sExcursion);
                 int[] ranksDirectionalRuns = getRanks(shufDirectionalRunsList, sDirectionalRuns);
@@ -99,14 +99,14 @@ namespace EntropySourceTesting
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("========== new dataset ==========");
                 Console.ResetColor();
-                //printScores(ranksCompression, "Ranks for Compression test");                
+                printScores(ranksCompression, "Ranks for Compression test");                
                 printScores(ranksRuns, "Ranks for Runs test");
                 printScores(ranksExcursion, "Ranks for Excursion test");
                 printScores(ranksDirectionalRuns, "Ranks for DirectionalRuns test");
                 printScores(ranksCovariance, "Ranks for Covariance test");
                 printScores(ranksCollision, "Ranks for Collision test");
 
-                //ranksCompressionList.Add(ranksCompression);
+                ranksCompressionList.Add(ranksCompression);
                 ranksRunsList.Add(ranksRuns);
                 ranksExcursionList.Add(ranksExcursion);
                 ranksDirectionalRunsList.Add(ranksDirectionalRuns);
@@ -220,16 +220,20 @@ namespace EntropySourceTesting
                 tmpList.Sort();
                 int medianValue = tmpList[500];
                 int score = sTest[j];
-                int rank = -1;
+                int rank = -2;
                 if (medianValue > score)
                 {
                     rank = tmpList.FindLastIndex(500, delegate (int scr) { return scr <= score; });
+                    if (rank == -1)
+                        rank = 0;
                 }
                 if (medianValue == score)
                     rank = 500;
                 if (medianValue < score)
                 {
                     rank = tmpList.FindIndex(500, delegate (int scr) { return scr >= score; });
+                    if (rank == -1)
+                        rank = 1000;
                 }
                 ranks[j] = rank;
             }
@@ -248,6 +252,8 @@ namespace EntropySourceTesting
 
         public static void Main()
         {
+            //main part
+
             Console.Title = "Entropy source shuffling test";
             Console.WriteLine("Working...");
             int[] ds = new int[10000];
@@ -259,7 +265,17 @@ namespace EntropySourceTesting
             ShufflingTest st = new ShufflingTest(ds);
             bool result = st.runTest();
             Console.WriteLine();
-            extendedResult(result, "Shuffling test");      
+            extendedResult(result, "Shuffling test");
+
+            //test
+            //int[] ds = new int[10000];
+            //Random r = new Random();
+            //for (int i = 0; i < ds.Length; i++)
+            //{
+            //    ds[i] = r.Next(255);
+            //}
+            //StatisticalScores.compressionScores(ds);
+
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
