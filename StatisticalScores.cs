@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.SharpZipLib.BZip2;
@@ -185,6 +186,41 @@ namespace EntropySourceTesting
             return new int[]{collisions.Min(), collisions.Max(), 
                     StandardFunctions.integerAverage(collisions.ToArray())
             };
+        }
+
+        /// <summary>
+        /// calculates compression score
+        /// </summary>
+        /// <param name="sample">sample to analyse</param>
+        /// <returns>length of the compressed string in bytes</returns>
+        public static int[] compressionScores(BitArray sample)
+        {
+            char[] symbols = new char[sample.Count];
+            for (int i = 0; i < sample.Count; i++)
+            {
+                symbols[i] = sample[i] ? '1' : '0';
+            }
+            string str = string.Join(",", symbols);
+            //Console.WriteLine(str);
+            int res = -1;
+            using (MemoryStream inp = new MemoryStream(Encoding.UTF8.GetBytes(str)))
+            {
+                using (MemoryStream compressed = new MemoryStream())
+                {
+                    //Console.WriteLine("uncompressed length = " + inp.Length);
+                    try
+                    {
+                        BZip2.Compress(inp, compressed, false, 4096);
+                        res = (int)compressed.Length;
+                        //Console.WriteLine("compressed length = " + res);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+            return new int[] { res };
         }
     }
 }
