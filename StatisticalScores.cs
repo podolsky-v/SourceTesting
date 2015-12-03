@@ -262,5 +262,26 @@ namespace EntropySourceTesting
             }
             return new int[] { longestRunLength, runsNumber };
         }
+
+        /// <summary>
+        /// calculates excursion score
+        /// </summary>
+        /// <param name="sample">sample to analyse</param>
+        /// <returns>maximal deviation from expected value</returns>
+        public static int[] excursionScores(BitArray sample)
+        {
+            decimal average = Utilities.bitAverage(sample);
+            decimal excursion = 0;
+            decimal maxAbsValue = 0;
+            for (int i = 0; i < sample.Length; ++i)
+            {
+                excursion += Convert.ToDecimal(sample[i]) - average;
+                if (Math.Abs(excursion) > maxAbsValue)
+                {
+                    maxAbsValue = Math.Abs(excursion);
+                }
+            }
+            return new int[] { (int)Decimal.Round(maxAbsValue) };
+        }
     }
 }
