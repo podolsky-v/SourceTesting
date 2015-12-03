@@ -222,5 +222,45 @@ namespace EntropySourceTesting
             }
             return new int[] { res };
         }
+
+        /// <summary>
+        /// calculates Over/Under Runs Score
+        /// </summary>
+        /// <param name="sample">sample to analyse</param>
+        /// <returns>longest run and total number of runs</returns>
+        public static int[] runsScores(BitArray sample)
+        {            
+            //median=0.5
+            //false: value is under the median
+            //true: value is over the median
+            int currentRunLength = 1;
+            bool currentSymbol = sample[0];
+            int longestRunLength = 1;
+            int runsNumber = 1;
+            ///////////////////////////////////////////////////////////////////////////////////////
+            for (int i = 1; i < sample.Count; ++i)
+            {
+                if (sample[i] != currentSymbol)
+                {
+                    //the next run
+                    if (currentRunLength > longestRunLength)
+                    {
+                        longestRunLength = currentRunLength;
+                    }
+                    currentRunLength = 1;
+                    ++runsNumber;
+                }
+                else
+                {
+                    //the same run
+                    ++currentRunLength;
+                }
+            }
+            if (currentRunLength > longestRunLength)
+            {
+                longestRunLength = currentRunLength;
+            }
+            return new int[] { longestRunLength, runsNumber };
+        }
     }
 }
