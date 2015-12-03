@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections;
 
 namespace EntropySourceTesting
 {
@@ -40,6 +38,21 @@ namespace EntropySourceTesting
         /// <returns>The specified number raised to the specified power</returns>
         public static double pow(double x, byte y) {
             return Math.Pow(x, y);
+        }
+
+        public static int ones(BitArray sample)
+        {
+            int ones = 0;
+            for (int i = 0; i < sample.Count; ++i)
+            {
+                if (sample[i] == true)
+                    ones++;
+            }
+            return ones;
+        }
+        public static decimal bitAverage(BitArray sample)
+        {
+            return (decimal)ones(sample) / sample.Count;
         }
     }
 }
