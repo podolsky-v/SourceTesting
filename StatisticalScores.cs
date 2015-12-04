@@ -13,6 +13,7 @@ namespace EntropySourceTesting
     /// </summary>
     public static class StatisticalScores
     {
+        #region Scores fot integer samples
         /// <summary>
         /// calculates compression score
         /// </summary>
@@ -219,7 +220,8 @@ namespace EntropySourceTesting
                     StandardFunctions.integerAverage(collisions.ToArray())
             };
         }
-
+        #endregion
+        #region Scores for bit samples
         /// <summary>
         /// calculates compression score
         /// </summary>
@@ -331,11 +333,49 @@ namespace EntropySourceTesting
             {
                 sum = 0;
                 for (int i = 0; i < 8; ++i)
-                    if(sample[8 * j + i])
+                    if (sample[8 * j + i])
                         ++sum;
                 hammingWeights[j] = sum;
             }
             return directionalRunsScores(hammingWeights);
         }
+
+        /// <summary>
+        /// calculates covariance score
+        /// </summary>
+        /// <param name="sample">sample to analyse</param>
+        /// <returns>covariance estimate</returns>
+        public static int[] covarianceScores(BitArray sample)
+        {
+            decimal count = 0;
+            decimal average = Utilities.bitAverage(sample);
+            for (int i = 1; i < sample.Count - 1; ++i)
+            {
+                count += (Convert.ToDecimal(sample[i]) - average) * (Convert.ToDecimal(sample[i + 1]) - average);
+            }
+            decimal result = count / (sample.Count - 1);
+            return new int[] { (int)Decimal.Round(result) };
+        }
+
+        /// <summary>
+        /// calculates collision score
+        /// </summary>
+        /// <param name="sample">sample to analyse</param>
+        /// <returns>number of values to collision: minimal, maximal and average</returns>
+        public static int[] collisionScores(BitArray sample)
+        {
+            byte[] bytes = new byte[sample.Count / 8];
+            sample.CopyTo(bytes, 0);
+            int[] modifiedSample = new int[bytes.Length];
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                modifiedSample[i] = Convert.ToInt32(bytes[i]);
+            }
+            int[] collisions = StandardFunctions.allCollisions(modifiedSample);
+            return new int[]{collisions.Min(), collisions.Max(),
+                    StandardFunctions.integerAverage(collisions.ToArray())
+            };
+        }
+        #endregion
     }
 }
