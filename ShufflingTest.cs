@@ -1,8 +1,139 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace EntropySourceTesting
 {
+    public class ShufflingTestBinary
+    {
+        private static Random randGen = new Random();
+
+        public static readonly int subsetNumber = 10;
+
+        private int subsetLength;
+
+        private BitArray[] subsets;
+
+        public ShufflingTestBinary(BitArray dataset)
+        {
+            subsetLength = dataset.Count / subsetNumber;
+            subsets = new BitArray[subsetNumber];
+            int shift = 0;
+            for (int currentSubset = 0; currentSubset < subsetNumber; ++currentSubset)
+            {
+                subsets[currentSubset] = new BitArray(subsetLength);
+                for (int position = 0; position < subsetLength; ++position)
+                {
+                    subsets[currentSubset][position] = dataset[shift + position];
+                }
+                shift += subsetLength;
+            }
+        }
+
+        /// <summary>
+        /// shuffles the bitarray
+        /// </summary>
+        /// <param name="array">BitArray to shuffle</param>
+        public static void shuffle(BitArray array)
+        {
+            for (int currentPosition = array.Count - 1; currentPosition >= 0; --currentPosition)
+            {
+                // NextDouble returns a random number between 0 and 1
+                int newPosition = (int)(randGen.NextDouble() * (currentPosition + 1));
+                bool tempElement = array[newPosition];
+                array[newPosition] = array[currentPosition];
+                array[currentPosition] = tempElement;
+            }
+        }
+
+        public bool runTest()
+        {
+            //Lists of computed ranks for each data subset for each test
+
+            List<int[]> ranksCompressionList = new List<int[]>(subsetNumber);
+            List<int[]> ranksRunsList = new List<int[]>(subsetNumber);
+            List<int[]> ranksExcursionList = new List<int[]>(subsetNumber);
+            List<int[]> ranksDirectionalRunsList = new List<int[]>(subsetNumber);
+            List<int[]> ranksCovarianceList = new List<int[]>(subsetNumber);
+            List<int[]> ranksCollisionList = new List<int[]>(subsetNumber);
+
+            foreach (BitArray subset in subsets)
+            {
+                int[] sCompression = StatisticalScores.compressionScores(subset);
+                int[] sRuns = StatisticalScores.runsScores(subset);
+                int[] sExcursion = StatisticalScores.excursionScores(subset);
+                int[] sDirectionalRuns = StatisticalScores.directionalRunsScores(subset);
+                int[] sCovariance = StatisticalScores.covarianceScores(subset);
+                int[] sCollision = StatisticalScores.collisionScores(subset);
+
+                //shuffling
+
+                //Shuffled subsets scores lists
+
+                List<int[]> shufCompressionList = new List<int[]>(1000);
+                List<int[]> shufRunsList = new List<int[]>(1000);
+                List<int[]> shufExcursionList = new List<int[]>(1000);
+                List<int[]> shufDirectionalRunsList = new List<int[]>(1000);
+                List<int[]> shufCovarianceList = new List<int[]>(1000);
+                List<int[]> shufCollisionList = new List<int[]>(1000);
+                for (int counter = 0; counter < 1000; counter++)
+                {
+                    shuffle(subset);
+                    shufCompressionList.Add(StatisticalScores.compressionScores(subset));
+                    shufRunsList.Add(StatisticalScores.runsScores(subset));
+                    shufExcursionList.Add(StatisticalScores.excursionScores(subset));
+                    shufDirectionalRunsList.Add(StatisticalScores.directionalRunsScores(subset));
+                    shufCovarianceList.Add(StatisticalScores.covarianceScores(subset));
+                    shufCollisionList.Add(StatisticalScores.collisionScores(subset));
+                }
+
+                int[] ranksCompression = ShufflingTest.getRanks(shufCompressionList, sCompression);
+                int[] ranksRuns = ShufflingTest.getRanks(shufRunsList, sRuns);
+                int[] ranksExcursion = ShufflingTest.getRanks(shufExcursionList, sExcursion);
+                int[] ranksDirectionalRuns = ShufflingTest.getRanks(shufDirectionalRunsList, sDirectionalRuns);
+                int[] ranksCovariance = ShufflingTest.getRanks(shufCovarianceList, sCovariance);
+                int[] ranksCollision = ShufflingTest.getRanks(shufCollisionList, sCollision);
+
+                //print ranks (optional)
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("========== new dataset ==========");
+                Console.ResetColor();
+                ShufflingTest.printScores(ranksCompression, "Ranks for Compression test");
+                ShufflingTest.printScores(ranksRuns, "Ranks for Runs test");
+                ShufflingTest.printScores(ranksExcursion, "Ranks for Excursion test");
+                ShufflingTest.printScores(ranksDirectionalRuns, "Ranks for DirectionalRuns test");
+                ShufflingTest.printScores(ranksCovariance, "Ranks for Covariance test");
+                ShufflingTest.printScores(ranksCollision, "Ranks for Collision test");
+
+                ranksCompressionList.Add(ranksCompression);
+                ranksRunsList.Add(ranksRuns);
+                ranksExcursionList.Add(ranksExcursion);
+                ranksDirectionalRunsList.Add(ranksDirectionalRuns);
+                ranksCovarianceList.Add(ranksCovariance);
+                ranksCollisionList.Add(ranksCollision);
+            }
+
+            //results with names
+            bool compression = ShufflingTest.testResult(ranksCompressionList, "Compression");
+            bool runs = ShufflingTest.testResult(ranksRunsList, "Runs");
+            bool excursion = ShufflingTest.testResult(ranksExcursionList, "Excursion");
+            bool directional = ShufflingTest.testResult(ranksDirectionalRunsList, "Directional runs");
+            bool covariance = ShufflingTest.testResult(ranksCovarianceList, "Covariance");
+            bool collision = ShufflingTest.testResult(ranksCollisionList, "Collsion");
+
+            //comment this section if extended resuls is out of need
+            #region extended results
+            ShufflingTest.extendedResult(compression, "Compression");
+            ShufflingTest.extendedResult(runs, "Over/Under Runs");
+            ShufflingTest.extendedResult(excursion, "Excursion");
+            ShufflingTest.extendedResult(directional, "Directional runs");
+            ShufflingTest.extendedResult(covariance, "Covariance");
+            ShufflingTest.extendedResult(collision, "Collision");
+            #endregion
+
+            return (compression && runs && excursion && directional && covariance && collision);
+        }
+    }
 
     public class ShufflingTest
     {
@@ -14,7 +145,9 @@ namespace EntropySourceTesting
 
         private int[][] subsets;
 
-        ShufflingTest(int[] dataset)
+        private BitArray[] binsubsets;
+
+        public ShufflingTest(int[] dataset)
         {
             subsetLength = dataset.Length / subsetNumber;
             subsets = new int[subsetNumber][];
@@ -29,7 +162,7 @@ namespace EntropySourceTesting
                 shift += subsetLength;
             }
         }
-
+        
         /// <summary>
         /// shuffles the array
         /// </summary>
@@ -113,15 +246,7 @@ namespace EntropySourceTesting
                 ranksCovarianceList.Add(ranksCovariance);
                 ranksCollisionList.Add(ranksCollision);                
             }
-
-            //results interpretation
-            //bool compression = testResult(ranksCompressionList);
-            //bool runs = testResult(ranksRunsList);
-            //bool excursion = testResult(ranksExcursionList);
-            //bool directional = testResult(ranksDirectionalRunsList);
-            //bool covariance = testResult(ranksCovarianceList);
-            //bool collision = testResult(ranksCollisionList);
-
+                        
             //results with names
             bool compression = testResult(ranksCompressionList, "Compression");
             bool runs = testResult(ranksRunsList, "Runs");
@@ -143,7 +268,7 @@ namespace EntropySourceTesting
             return (compression && runs && excursion && directional && covariance && collision);
         }
 
-        private static void extendedResult(bool test, string testname)
+        public static void extendedResult(bool test, string testname)
         {
             if (test)
             {
@@ -158,29 +283,8 @@ namespace EntropySourceTesting
                 Console.ResetColor();
             }
         }
-
-        private static bool testResult(List<int[]> ranksList)
-        {
-            int count = 0;
-            foreach (int[] ranks in ranksList)
-            {
-                //printScores(ranks, "test ranks");
-                if (testFailed(ranks))
-                    count++;
-            }
-            Console.WriteLine("Number of failed subsets in executed test " + count);
-            if (count >= 8)
-            {
-                //Console.WriteLine("test failed");
-                return false;
-            }
-            else
-            {
-                //Console.WriteLine("test passed");
-                return true;
-            }
-        }
-        private static bool testResult(List<int[]> ranksList, string message)
+                
+        public static bool testResult(List<int[]> ranksList, string message)
         {
             int count = 0;
             foreach (int[] ranks in ranksList)
@@ -202,12 +306,12 @@ namespace EntropySourceTesting
             }
         }
 
-        private static bool testFailed(int[] ranks)
+        public static bool testFailed(int[] ranks)
         {
             return Array.TrueForAll<int>(ranks, delegate (int rank) { return (rank <= 50 || rank >= 950); });
         }
 
-        private static int[] getRanks(List<int[]> shufScoresList, int[] sTest)
+        public static int[] getRanks(List<int[]> shufScoresList, int[] sTest)
         {
             int[] ranks = new int[shufScoresList[0].Length];
             for (int j = 0; j < shufScoresList[0].Length; j++)
@@ -240,7 +344,7 @@ namespace EntropySourceTesting
             return ranks;
         }
        
-        private static void printScores(int[] scores, string testname)
+        public static void printScores(int[] scores, string testname)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine(testname);
@@ -248,36 +352,6 @@ namespace EntropySourceTesting
             foreach (int i in scores)
                 Console.Write(i + " ");
             Console.WriteLine();
-        }
-
-        public static void Main()
-        {
-            //main part
-
-            Console.Title = "Entropy source shuffling test";
-            Console.WriteLine("Working...");
-            int[] ds = new int[10000];
-            Random r = new Random();
-            for (int i = 0; i < ds.Length; i++)
-            {
-                ds[i] = r.Next(255);
-            }
-            ShufflingTest st = new ShufflingTest(ds);
-            bool result = st.runTest();
-            Console.WriteLine();
-            extendedResult(result, "Shuffling test");
-
-            //test
-            //int[] ds = new int[10000];
-            //Random r = new Random();
-            //for (int i = 0; i < ds.Length; i++)
-            //{
-            //    ds[i] = r.Next(255);
-            //}
-            //StatisticalScores.compressionScores(ds);
-
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-        }
+        }       
     }
 }
