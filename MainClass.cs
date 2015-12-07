@@ -32,11 +32,11 @@ namespace EntropySourceTesting
                 ds2[i] = r.Next();
             }
 
-            BitArray bs = new BitArray(ds);
+            BitArray bs = new BitArray(ds2);
             ShufflingTestBinary stBin = new ShufflingTestBinary(bs);
             bool resultBin = stBin.runTest();
             Console.WriteLine();
-            ShufflingTest.extendedResult(resultBin, "Shuffling test");
+            ShufflingTest.extendedResult(resultBin, "Shuffling test for binary data");
 
 
             Console.WriteLine("Press any key to exit...");

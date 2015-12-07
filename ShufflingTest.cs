@@ -144,9 +144,7 @@ namespace EntropySourceTesting
         private int subsetLength;
 
         private int[][] subsets;
-
-        private BitArray[] binsubsets;
-
+        
         public ShufflingTest(int[] dataset)
         {
             subsetLength = dataset.Length / subsetNumber;
